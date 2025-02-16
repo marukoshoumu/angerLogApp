@@ -18,7 +18,7 @@ export async function POST(request: Request) {
         userId,
         level,
         workTypeId,
-        occurredDate: new Date(occurredDate).toISOString(),
+        occurredDate,
         situation,
         feeling,
       },
@@ -45,7 +45,7 @@ export async function PUT(request: Request) {
       data: {
         level,
         workTypeId,
-        occurredDate: new Date(occurredDate).toISOString(),
+        occurredDate,
         situation,
         feeling,
       },
