@@ -160,7 +160,7 @@ const AngerLogForm = ({
       const user = await checkAuth();
       const occurredDateTimeZone = new Date(
         `${formData.date}T${formData.time}`
-      );
+      ).toISOString();
       // アンガーログ登録
       const response = await fetch(`/api/angerlog`, {
         method: "POST",
@@ -226,7 +226,7 @@ const AngerLogForm = ({
       if (!angerId) throw new Error("IDが存在しません。");
       const occurredDateTimeZone = new Date(
         `${formData.date}T${formData.time}`
-      );
+      ).toISOString();
       // アンガーログ更新
       const response = await fetch(`/api/angerlog`, {
         method: "PUT",
