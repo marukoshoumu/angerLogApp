@@ -2,8 +2,6 @@
 
 import { createClient } from "@/utils/supabase/server";
 import { redirect } from "next/navigation";
-import { toast } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 /**
  * ログイン用のAPI
  * @param formData メールアドレスとパスワードのフォームデータ
@@ -38,7 +36,13 @@ export async function signup(formData: FormData) {
     name: formData.get("name") as string,
   };
   // サインアップ処理
-  const { data, error } = await supabase.auth.signUp(inputData);
+  const { data, error } = await supabase.auth.signUp({
+    email: inputData.email,
+    password: inputData.password,
+    options: {
+      data: { name: inputData.name },
+    },
+  });
 
   if (error) {
     console.error("サインアップエラー:", error);
@@ -51,7 +55,6 @@ export async function signup(formData: FormData) {
       {
         id: userId,
         email: inputData.email,
-        password: inputData.password,
         name: inputData.name,
       },
     ]);
@@ -72,7 +75,6 @@ export const checkAuth = async () => {
   } = await supabase.auth.getUser();
 
   if (!user || error) {
-    toast.error(error?.message || "認証ユーザーが存在しませんでした。");
     redirect("/login");
   }
 

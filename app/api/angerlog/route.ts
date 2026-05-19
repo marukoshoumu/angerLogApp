@@ -10,12 +10,14 @@ import { getDateRange } from "../utils/dateUtils";
  */
 export async function POST(request: Request) {
   try {
+    // ユーザ認証
+    const user = await checkAuth();
     const body = await request.json();
-    const { userId, level, workTypeId, occurredDate, situation, feeling } = body;
+    const { level, workTypeId, occurredDate, situation, feeling } = body;
     // アンガーログデータ登録
     const record = await prisma.angerRecord.create({
       data: {
-        userId,
+        userId: user.id,
         level,
         workTypeId,
         occurredDate,
@@ -37,11 +39,13 @@ export async function POST(request: Request) {
  */
 export async function PUT(request: Request) {
   try {
+    // ユーザ認証
+    const user = await checkAuth();
     const body = await request.json();
     const { id, level, workTypeId, occurredDate, situation, feeling } = body;
-    // アンガーログデータ更新
-    const record = await prisma.angerRecord.update({
-      where: { id },
+    // アンガーログデータ更新（所有権確認込み）
+    const record = await prisma.angerRecord.updateMany({
+      where: { id, userId: user.id },
       data: {
         level,
         workTypeId,
@@ -51,9 +55,12 @@ export async function PUT(request: Request) {
       },
     });
 
-    return NextResponse.json(record, { status: 201 });
+    if (record.count === 0) {
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    }
+    return NextResponse.json(record, { status: 200 });
   } catch (error) {
-    console.error("Error during POST request:", error);
+    console.error("Error during PUT request:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -63,9 +70,6 @@ export async function PUT(request: Request) {
  * @returns アンガーログデータ
  */
 export async function GET(request: Request) {
-  // ユーザ認証
-  const user = await checkAuth();
-  const userId = user.id;
   // パラメータ取得
   const { searchParams } = new URL(request.url);
   const year = searchParams.get("year");
@@ -74,6 +78,10 @@ export async function GET(request: Request) {
   const type = searchParams.get("type") as "daily" | "monthly";
 
   try {
+    // ユーザ認証
+    const user = await checkAuth();
+    const userId = user.id;
+
     if (type !== "daily" && type !== "monthly") {
       return NextResponse.json({ error: "Invalid type parameter" }, { status: 400 });
     }
