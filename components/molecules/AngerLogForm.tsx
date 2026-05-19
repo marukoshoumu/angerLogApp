@@ -7,7 +7,6 @@ import { Box, Button } from "@mui/material";
 import { useRouter } from "next/navigation";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import { checkAuth } from "@/api/auth";
 import Loading from "@/app/loading";
 
 export type AngerLog = {
@@ -156,8 +155,6 @@ const AngerLogForm = ({
     const toastId = toast.loading("処理中・・・・。");
 
     try {
-      // ユーザー認証
-      const user = await checkAuth();
       const occurredDateTimeZone = new Date(
         `${formData.date}T${formData.time}`
       ).toISOString();
@@ -168,7 +165,6 @@ const AngerLogForm = ({
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          userId: user.id,
           level: formData.level,
           workTypeId: formData.workTypeId,
           occurredDate: occurredDateTimeZone,
@@ -206,10 +202,10 @@ const AngerLogForm = ({
   const handleSubmit = async () => {
     if (mode === "edit" && angerId) {
       // 更新処理
-      handleUpdate();
+      await handleUpdate();
     } else {
       // 登録処理
-      handleInsert();
+      await handleInsert();
     }
   };
   // 更新処理

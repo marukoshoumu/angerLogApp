@@ -9,9 +9,6 @@ import { getDateRange } from "../../utils/dateUtils";
  * @returns アンガーログのチャートデータ　最大値、平均値、カテゴリトップ5
  */
 export async function GET(request: Request) {
-  // ユーザ認証
-  const user = await checkAuth();
-  const userId = user.id;
   // パラメータ取得
   const { searchParams } = new URL(request.url);
   const year = searchParams.get("year");
@@ -20,6 +17,10 @@ export async function GET(request: Request) {
   const type = searchParams.get("type") as "daily" | "monthly";
 
   try {
+    // ユーザ認証
+    const user = await checkAuth();
+    const userId = user.id;
+
     if (type !== "daily" && type !== "monthly") {
       return NextResponse.json({ error: "Invalid type parameter" }, { status: 400 });
     }

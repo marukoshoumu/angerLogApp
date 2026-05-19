@@ -79,8 +79,10 @@ const DataSelector: React.FC<DataSelectorProps> = ({ filter, onFilter }) => {
             onChange={(e) => setYear(e.target.value)}
             size="small"
           >
-            <MenuItem value="2024">2024</MenuItem>
-            <MenuItem value="2025">2025</MenuItem>
+            {Array.from({ length: 5 }, (_, i) => {
+              const y = (new Date().getFullYear() - 2 + i).toString();
+              return <MenuItem key={y} value={y}>{y}</MenuItem>;
+            })}
           </Select>
         </FormControl>
         <FormControl>

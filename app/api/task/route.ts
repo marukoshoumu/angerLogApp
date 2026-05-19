@@ -36,22 +36,25 @@ export async function POST(request: Request) {
  */
 export async function PUT(request: Request) {
   try {
+    // ユーザ認証
+    const user = await checkAuth();
     const body = await request.json();
-    const { id, category,
-      content,
-    } = body;
-    // 作業内容データ更新
-    const record = await prisma.workContent.update({
-      where: { id },
+    const { id, category, content } = body;
+    // 作業内容データ更新（所有権確認込み）
+    const record = await prisma.workContent.updateMany({
+      where: { id, userId: user.id },
       data: {
         category,
         content,
       },
     });
 
-    return NextResponse.json(record, { status: 201 });
+    if (record.count === 0) {
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    }
+    return NextResponse.json(record, { status: 200 });
   } catch (error) {
-    console.error("Error during POST request:", error);
+    console.error("Error during PUT request:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
@@ -62,17 +65,21 @@ export async function PUT(request: Request) {
  */
 export async function DELETE(request: Request) {
   try {
+    // ユーザ認証
+    const user = await checkAuth();
     const body = await request.json();
-    const { id
-    } = body;
-    // 作業内容データ削除
-    const record = await prisma.workContent.delete({
-      where: { id },
+    const { id } = body;
+    // 作業内容データ削除（所有権確認込み）
+    const record = await prisma.workContent.deleteMany({
+      where: { id, userId: user.id },
     });
 
-    return NextResponse.json(record, { status: 201 });
+    if (record.count === 0) {
+      return NextResponse.json({ error: "Not Found" }, { status: 404 });
+    }
+    return NextResponse.json(record, { status: 200 });
   } catch (error) {
-    console.error("Error during POST request:", error);
+    console.error("Error during DELETE request:", error);
     return NextResponse.json({ error: "Internal Server Error" }, { status: 500 });
   }
 }
